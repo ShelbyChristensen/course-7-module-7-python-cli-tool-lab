@@ -6,7 +6,7 @@ def run_cli_command(command):
     return subprocess.run(command, capture_output=True, text=True)
 
 def test_add_task():
-    result = run_cli_command(["python", "-m", "lib.cli_tool", "add-task", "Alice", "Submit report"])
+    result = run_cli_command(["python3", "-m", "lib.cli_tool", "add-task", "Alice", "Submit report"])
     assert "📌 Task 'Submit report' added to Alice." in result.stdout
 
 def test_complete_task_with_script(tmp_path):
@@ -27,5 +27,5 @@ task.complete()
 """
     script_path.write_text(script_content)
 
-    result = subprocess.run(["python", str(script_path)], capture_output=True, text=True)
+    result = subprocess.run(["python3", str(script_path)], capture_output=True, text=True)
     assert "✅ Task 'Finish lab' completed." in result.stdout

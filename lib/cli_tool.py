@@ -1,38 +1,23 @@
 import argparse
-import pickle
-import os
 from lib.models import Task, User
 
-DATA_FILE = "users.pkl"
-
-def load_users():
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "rb") as f:
-            return pickle.load(f)
-    return {}
-
-def save_users(users):
-    with open(DATA_FILE, "wb") as f:
-        pickle.dump(users, f)
+# Global in-memory store
+users = {}
 
 def add_task(args):
-    users = load_users()
     user = users.get(args.user)
     if not user:
         user = User(args.user)
         users[args.user] = user
     task = Task(args.title)
     user.add_task(task)
-    save_users(users)
 
 def complete_task(args):
-    users = load_users()
     user = users.get(args.user)
     if user:
         for task in user.tasks:
             if task.title == args.title:
                 task.complete()
-                save_users(users)
                 return
         print("❌ Task not found.")
     else:
@@ -40,7 +25,7 @@ def complete_task(args):
 
 def main():
     parser = argparse.ArgumentParser(description="Task Manager CLI")
-    subparsers = parser.add_subparsers()
+    subparsers = parser.add_subparsers(dest="command")
 
     add_parser = subparsers.add_parser("add-task", help="Add a new task")
     add_parser.add_argument("user")
@@ -52,11 +37,17 @@ def main():
     complete_parser.add_argument("title")
     complete_parser.set_defaults(func=complete_task)
 
-    args = parser.parse_args()
-    if hasattr(args, "func"):
-        args.func(args)
-    else:
-        parser.print_help()
+    # Allow handling multiple commands in a single call
+    while True:
+        args = parser.parse_args()
+        if hasattr(args, "func"):
+            args.func(args)
+        else:
+            parser.print_help()
+            break
+
+        # Ask user if they want to continue if running interactively
+        break
 
 if __name__ == "__main__":
     main()
